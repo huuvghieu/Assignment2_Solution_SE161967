@@ -14,7 +14,7 @@ namespace eStore.Client.Pages
 
         public IActionResult OnGet()
         {
-            return RedirectToPage("/Publishers/Index");
+            return RedirectToPage("/Auth/Login");
         }
     }
 }

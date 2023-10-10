@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using eBookStore.Repository.Entity;
 using eBookStore.Repository.Model.RequestModel;
 using eBookStore.Repository.Model.ResponseModel;
 using eBookStore.Repository.Repository;
@@ -39,7 +40,7 @@ namespace eBookStore.Service.Service.Implement
                 var listRole = RoleRepository.Instance.GetAll();
 
                 bool isAdmin = loginRequest.Email.Equals(emailAdmin) && loginRequest.Password.Equals(passwordAdmin);
-
+                #region Admin
                 if (isAdmin)
                 {
                     var roleAdmin = listRole.Where(x => x.RoleId == 1).SingleOrDefault();
@@ -67,6 +68,8 @@ namespace eBookStore.Service.Service.Implement
                     };
                     return loginResponse;
                 }
+                #endregion
+                #region Member
                 else
                 {
                     var roleMember = listRole.Where(x => x.RoleId == 2).SingleOrDefault();
@@ -104,6 +107,7 @@ namespace eBookStore.Service.Service.Implement
 
                     return loginResponse;
                 }
+                #endregion
             }
             catch (CrudException ex)
             {
@@ -115,9 +119,28 @@ namespace eBookStore.Service.Service.Implement
             }
         }
 
-        public Task<UserResponseModel> Register(CreateUserRequestModel createMemberRequest)
+        public async Task<UserResponseModel> Register(CreateUserRequestModel userRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var check = UserRepository.Instance.GetAll().Where(x => x.EmailAddres.Equals(userRequest.EmailAddres))
+                                                             .SingleOrDefault();
+                if (check != null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "User is already exist!!!", userRequest.EmailAddres);
+                }
+                var user = _mapper.Map<CreateUserRequestModel, User>(userRequest);
+                await UserRepository.Instance.InsertUser(user);
+                return _mapper.Map<User, UserResponseModel>(user);
+            }
+            catch (CrudException ex)
+            {
+                throw new CrudException(ex.StatusCode, ex.Message, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

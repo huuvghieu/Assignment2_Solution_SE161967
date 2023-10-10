@@ -8,70 +8,65 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using eBookStore.Repository.Context;
 using eBookStore.Repository.Entity;
+using System.Net.Http.Headers;
+using eBookStore.Repository.Model.ResponseModel;
+using eBookStore.Client.Helpers;
+using System.Text.Json;
 
 namespace eBookStore.Client.Pages.Publishers
 {
     public class EditModel : PageModel
     {
-        private readonly eBookStore.Repository.Context.EBookStoreDbContext _context;
+        private readonly HttpClient client = null;
+        private string PublisherApiUrl = "";
 
-        public EditModel(eBookStore.Repository.Context.EBookStoreDbContext context)
+        public EditModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            PublisherApiUrl = "https://localhost:7209/odata/Publishers";
         }
 
         [BindProperty]
-        public Publisher Publisher { get; set; } = default!;
+        public PublisherResponseModel Publisher { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null || _context.Publisher == null)
-            {
-                return NotFound();
-            }
+            var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+            HttpResponseMessage response = await client.GetAsync($"{PublisherApiUrl}/{id}");
+            string strData = await response.Content.ReadAsStringAsync();
 
-            var publisher =  await _context.Publisher.FirstOrDefaultAsync(m => m.PublisherId == id);
-            if (publisher == null)
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            Publisher = JsonSerializer.Deserialize<PublisherResponseModel>(strData, options);
+
+            if (Publisher == null)
             {
                 return NotFound();
             }
-            Publisher = publisher;
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return Page();
-            }
-
-            _context.Attach(Publisher).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PublisherExists(Publisher.PublisherId))
+                var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                HttpResponseMessage response = await client.PutAsJsonAsync($"{PublisherApiUrl}/{Publisher.PublisherId}", Publisher);
+                if (response.IsSuccessStatusCode)
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    var rs = await response.Content.ReadFromJsonAsync<PublisherResponseModel>();
+                    return RedirectToPage("./Index");
                 }
             }
-
-            return RedirectToPage("./Index");
+            return Page();
         }
 
-        private bool PublisherExists(int id)
-        {
-          return _context.Publisher.Any(e => e.PublisherId == id);
-        }
     }
 }

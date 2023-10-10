@@ -27,7 +27,7 @@ namespace eBookStore.Repository.Entity
         public string Note { get; set; } = default!;
         public DateTime PublishedDate { get; set; } = default!;
 
-        public virtual ICollection<BookAuthor> BookAuthors { get; set; } = default!;
+        public BookAuthor BookAuthor { get; set; } = default!;
 
     }
 }

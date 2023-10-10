@@ -27,7 +27,7 @@ namespace eBookStore.API.Controllers
 
         [EnableQuery]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserResponseModel>> GetById([FromRoute] int key)
+        public async Task<ActionResult<UserResponseModel>> Get([FromRoute] int key)
         {
             var rs = await _userService.GetUserById(key);
             return Ok(rs);

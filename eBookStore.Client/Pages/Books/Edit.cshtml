@@ -1,8 +1,10 @@
 ﻿@page
+@using eBookStore.Client.Helpers;
 @model eBookStore.Client.Pages.Books.EditModel
 
 @{
     ViewData["Title"] = "Edit";
+    List<SelectListItem> PubList = SessionHelper.GetObjectFromJson<List<SelectListItem>>(HttpContext.Session, "PublisherList");
 }
 
 <h1>Edit</h1>
@@ -24,9 +26,11 @@
                 <input asp-for="Book.Type" class="form-control" />
                 <span asp-validation-for="Book.Type" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Book.PublishserId" class="control-label"></label>
-                <select asp-for="Book.PublishserId" class="form-control" asp-items="ViewBag.PublishserId"></select>
+            <div class="mb-3 col-6">
+                <label asp-for="Book.PublishserId"></label>
+                <select asp-for="Book.PublishserId" asp-items="@PubList" class="form-select">
+                    <option disabled selected>--Select Publisher--</option>
+                </select>
                 <span asp-validation-for="Book.PublishserId" class="text-danger"></span>
             </div>
             <div class="form-group">

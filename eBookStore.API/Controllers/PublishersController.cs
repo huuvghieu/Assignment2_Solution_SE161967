@@ -26,14 +26,14 @@ namespace eBookStore.API.Controllers
         }
 
         [EnableQuery]
-        public async Task<ActionResult<PublisherResponseModel>> GetById([FromRoute] int key)
+        public async Task<ActionResult<PublisherResponseModel>> Get([FromRoute] int key)
         {
             var rs = await _pubService.GetPublisherById(key);
             return Ok(rs);
         }
 
         [EnableQuery]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
 
         public async Task<ActionResult<PublisherResponseModel>> Post([FromBody] CreatePublisherRequestModel request)
         {

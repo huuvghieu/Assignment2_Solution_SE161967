@@ -27,7 +27,7 @@ namespace eBookStore.API.Controllers
 
         [EnableQuery]
 
-        public async Task<ActionResult<BookResponseModel>> GetById([FromRoute] int key)
+        public async Task<ActionResult<BookResponseModel>> Get([FromRoute] int key)
         {
             var rs = await _bookService.GetBookById(key);
             return Ok(rs);

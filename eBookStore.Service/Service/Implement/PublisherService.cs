@@ -83,7 +83,7 @@ namespace eBookStore.Service.Service.Implement
                                                              .SingleOrDefault();
                 if (checkPub != null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Book is already exist!!!", pubRequest.PublisherName);
+                    throw new CrudException(HttpStatusCode.NotFound, "publisher is already exist!!!", pubRequest.PublisherName);
                 }
                 var publisher = _mapper.Map<CreatePublisherRequestModel, Publisher>(pubRequest);
                 await PublisherRepository.Instance.InsertPublisher(publisher);

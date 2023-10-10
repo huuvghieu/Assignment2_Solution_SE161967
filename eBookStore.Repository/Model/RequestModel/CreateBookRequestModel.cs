@@ -20,7 +20,7 @@ namespace eBookStore.Repository.Model.RequestModel
         public int YTDSale { get; set; } = default!;
         public string Note { get; set; } = default!;
         public DateTime PublishedDate { get; set; } = default!;
-        public virtual ICollection<BookAuthorRequestModel> BookAuthors { get; set; } = default!;
+        public BookAuthorRequestModel BookAuthor { get; set; } = default!;
 
     }
 

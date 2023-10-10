@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using eBookStore.Repository.Context;
 using eBookStore.Repository.Entity;
+using System.Net.Http.Headers;
+using eBookStore.Repository.Model.ResponseModel;
 
 namespace eBookStore.Client.Pages.Authors
 {
     public class CreateModel : PageModel
     {
-        private readonly eBookStore.Repository.Context.EBookStoreDbContext _context;
-
-        public CreateModel(eBookStore.Repository.Context.EBookStoreDbContext context)
+        private readonly HttpClient client = null;
+        private string AuthorApiUrl = "";
+        public CreateModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            AuthorApiUrl = "https://localhost:7209/odata/Authors";
         }
 
         public IActionResult OnGet()
@@ -25,21 +30,24 @@ namespace eBookStore.Client.Pages.Authors
         }
 
         [BindProperty]
-        public Author Author { get; set; } = default!;
+        public AuthorResponseModel Author { get; set; } = default!;
         
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-          if (!ModelState.IsValid || _context.Author == null || Author == null)
+            if (ModelState.IsValid)
             {
-                return Page();
+                //var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                HttpResponseMessage response = await client.PostAsJsonAsync(AuthorApiUrl, Author);
+                if (response.IsSuccessStatusCode)
+                {
+                    var rs = await response.Content.ReadFromJsonAsync<AuthorResponseModel>();
+                    return RedirectToPage("./Index");
+                }
             }
-
-            _context.Author.Add(Author);
-            await _context.SaveChangesAsync();
-
-            return RedirectToPage("./Index");
+            return Page();
         }
     }
 }

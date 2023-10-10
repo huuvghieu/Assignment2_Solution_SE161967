@@ -49,7 +49,7 @@ namespace eBookStore.Repository.Repository
         {
             try
             {
-                return _context.Author.AsNoTracking();
+                return _context.Author.AsNoTracking().Include(x => x.BookAuthors);
             }
             catch (Exception ex)
             {

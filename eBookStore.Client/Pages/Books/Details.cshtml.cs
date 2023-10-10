@@ -7,35 +7,43 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using eBookStore.Repository.Context;
 using eBookStore.Repository.Entity;
+using eBookStore.Repository.Model.ResponseModel;
+using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace eBookStore.Client.Pages.Books
 {
     public class DetailsModel : PageModel
     {
-        private readonly eBookStore.Repository.Context.EBookStoreDbContext _context;
-
-        public DetailsModel(eBookStore.Repository.Context.EBookStoreDbContext context)
+        private readonly HttpClient client = null;
+        private string BookApiUrl = "";
+        public BookResponseModel Book { get; set; } = default!;
+        public DetailsModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            BookApiUrl = "https://localhost:7209/odata/Books";
         }
 
-      public Book Book { get; set; } = default!; 
+
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null || _context.Book == null)
-            {
-                return NotFound();
-            }
+            HttpResponseMessage response = await client.GetAsync($"{BookApiUrl}/{id}");
+            string strData = await response.Content.ReadAsStringAsync();
 
-            var book = await _context.Book.FirstOrDefaultAsync(m => m.BookId == id);
-            if (book == null)
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            Book = JsonSerializer.Deserialize<BookResponseModel>(strData, options);
+
+            if (Book == null)
             {
                 return NotFound();
-            }
-            else 
-            {
-                Book = book;
             }
             return Page();
         }

@@ -22,7 +22,7 @@ namespace eBookStore.Repository.Model.ResponseModel
         public int YTDSale { get; set; } = default!;
         public string Note { get; set; } = default!;
         public DateTime PublishedDate { get; set; } = default!;
-        public virtual ICollection<BookAuthorResponseModel> BookAuthors { get; set; } = default!;
+        public BookAuthorResponseModel BookAuthor { get; set; } = default!;
     }
 
     public class BookAuthorResponseModel

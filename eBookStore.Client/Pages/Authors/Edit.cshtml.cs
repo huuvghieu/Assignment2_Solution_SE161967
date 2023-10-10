@@ -8,70 +8,64 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using eBookStore.Repository.Context;
 using eBookStore.Repository.Entity;
+using System.Net.Http.Headers;
+using eBookStore.Repository.Model.ResponseModel;
+using System.Text.Json;
+using eBookStore.Client.Helpers;
 
 namespace eBookStore.Client.Pages.Authors
 {
     public class EditModel : PageModel
     {
-        private readonly eBookStore.Repository.Context.EBookStoreDbContext _context;
+        private readonly HttpClient client = null;
+        private string AuthorApiUrl = "";
 
-        public EditModel(eBookStore.Repository.Context.EBookStoreDbContext context)
+        public EditModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            AuthorApiUrl = "https://localhost:7209/odata/Authors";
         }
 
         [BindProperty]
-        public Author Author { get; set; } = default!;
+        public AuthorResponseModel Author { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null || _context.Author == null)
-            {
-                return NotFound();
-            }
+            var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+            HttpResponseMessage response = await client.GetAsync($"{AuthorApiUrl}/{id}");
+            string strData = await response.Content.ReadAsStringAsync();
 
-            var author =  await _context.Author.FirstOrDefaultAsync(m => m.AuthorId == id);
-            if (author == null)
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            Author = JsonSerializer.Deserialize<AuthorResponseModel>(strData, options);
+
+            if (Author == null)
             {
                 return NotFound();
             }
-            Author = author;
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return Page();
-            }
-
-            _context.Attach(Author).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AuthorExists(Author.AuthorId))
+                var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                HttpResponseMessage response = await client.PutAsJsonAsync($"{AuthorApiUrl}/{Author.AuthorId}", Author);
+                if (response.IsSuccessStatusCode)
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    var rs = await response.Content.ReadFromJsonAsync<PublisherResponseModel>();
+                    return RedirectToPage("./Index");
                 }
             }
-
-            return RedirectToPage("./Index");
-        }
-
-        private bool AuthorExists(int id)
-        {
-          return (_context.Author?.Any(e => e.AuthorId == id)).GetValueOrDefault();
+            return Page();
         }
     }
 }

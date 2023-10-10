@@ -9,6 +9,7 @@ using eBookStore.Repository.Context;
 using eBookStore.Repository.Entity;
 using eBookStore.Repository.Model.ResponseModel;
 using System.Net.Http.Headers;
+using eBookStore.Client.Helpers;
 
 namespace eBookStore.Client.Pages.Publishers
 {
@@ -34,13 +35,12 @@ namespace eBookStore.Client.Pages.Publishers
         public PublisherResponseModel Publisher { get; set; }
         
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
-                //var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
-                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                var jwtToken = SessionHelper.GetObjectFromJson<string>(HttpContext.Session, "JWTToken");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
                 HttpResponseMessage response = await client.PostAsJsonAsync(PublisherApiUrl, Publisher);
                 if (response.IsSuccessStatusCode)
                 {

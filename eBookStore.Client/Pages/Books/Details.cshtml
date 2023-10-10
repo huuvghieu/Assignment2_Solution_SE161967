@@ -24,10 +24,10 @@
             @Html.DisplayFor(model => model.Book.Type)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Book.Publisher)
+            @Html.DisplayNameFor(model => model.Book.PublishserId)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Book.Publisher.PublisherName)
+            @Html.DisplayFor(model => model.Book.PublishserId)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Book.Price)
@@ -67,7 +67,47 @@
         </dd>
     </dl>
 </div>
+
 <div>
-    <a asp-page="./Edit" asp-route-id="@Model.Book?.BookId">Edit</a> |
+    <h4>BookAuthors</h4>
+    <hr />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    BookId
+                </th>
+                <th>
+                    AuthorId
+                </th>
+                <th>
+                    Author Order
+                </th>
+                <th>
+                    Royalty Percentage
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => modelItem.Book.BookAuthor.BookId)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => modelItem.Book.BookAuthor.AuthorId)
+
+                </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => modelItem.Book.BookAuthor.AuthorOrder)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => modelItem.Book.BookAuthor.RoyaltyPercentage)
+                    </td>
+
+                </tr>
+        </tbody>
+    </table>
+</div>
+<div>
     <a asp-page="./Index">Back to List</a>
 </div>

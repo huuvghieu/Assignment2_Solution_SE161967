@@ -1,8 +1,10 @@
 ﻿@page
+@using eBookStore.Client.Helpers;
 @model eBookStore.Client.Pages.Books.CreateModel
-
 @{
     ViewData["Title"] = "Create";
+    List<SelectListItem> PubList = SessionHelper.GetObjectFromJson<List<SelectListItem>>(HttpContext.Session, "PublisherList");
+    List<SelectListItem> AuthorList = SessionHelper.GetObjectFromJson<List<SelectListItem>>(HttpContext.Session, "AuthorList");
 }
 
 <h1>Create</h1>
@@ -23,9 +25,12 @@
                 <input asp-for="Book.Type" class="form-control" />
                 <span asp-validation-for="Book.Type" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Book.PublishserId" class="control-label"></label>
-                <select asp-for="Book.PublishserId" class ="form-control" asp-items="ViewBag.PublishserId"></select>
+            <div class="mb-3 col-6">
+                <label asp-for="Book.PublishserId"></label>
+                <select asp-for="Book.PublishserId" asp-items="@PubList" class="form-select">
+                    <option disabled selected>--Select Publisher--</option>
+                </select>
+                <span asp-validation-for="Book.PublishserId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Book.Price" class="control-label"></label>
@@ -57,9 +62,50 @@
                 <input asp-for="Book.PublishedDate" class="form-control" />
                 <span asp-validation-for="Book.PublishedDate" class="text-danger"></span>
             </div>
+@*             @foreach(var item in Model.Book.BookAuthors)
+            {
+                <div class="mb-3 col-6">
+                    <label asp-for="@item.AuthorId"></label>
+                    <select asp-for="@item.AuthorId" asp-items="@AuthorList" class="form-select">
+                        <option disabled selected>--Select Author--</option>
+                    </select>
+                    <span asp-validation-for="@item.AuthorId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@item.AuthorOrder" class="control-label"></label>
+                    <input asp-for="@item.AuthorOrder" class="form-control" />
+                    <span asp-validation-for="@item.AuthorOrder" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@item.RoyaltyPercentage" class="control-label"></label>
+                    <input asp-for="@item.RoyaltyPercentage" class="form-control" />
+                    <span asp-validation-for="@item.RoyaltyPercentage" class="text-danger"></span>
+                </div>
+            } *@
+
+            <div class="mb-3 col-6">
+                <label asp-for="AuthorId"></label>
+                <select asp-for="AuthorId" asp-items="@AuthorList" class="form-select">
+                    <option disabled selected>--Select Author--</option>
+                </select>
+                <span asp-validation-for="AuthorId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AuthorOrder" class="control-label"></label>
+                <input asp-for="AuthorOrder" class="form-control" />
+                <span asp-validation-for="AuthorOrder" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoyaltyPercentage" class="control-label"></label>
+                <input asp-for="RoyaltyPercentage" class="form-control" />
+                <span asp-validation-for="RoyaltyPercentage" class="text-danger"></span>
+            </div>
+            
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
+
+
         </form>
     </div>
 </div>

@@ -51,7 +51,7 @@ namespace eBookStore.Service.Service.Implement
         {
             try
             {
-                var book = await BookRepository.Instance.GetBookById(id);
+                var book = BookRepository.Instance.GetAll().Where(x => x.BookId == id).SingleOrDefault();
                 if(book == null)
                 {
                     throw new CrudException(HttpStatusCode.NotFound, $"Not found book with {id}", id.ToString());
@@ -72,7 +72,7 @@ namespace eBookStore.Service.Service.Implement
                 List<BookResponseModel> result = new List<BookResponseModel>();
                 foreach (var book in books)
                 {
-                    var bookAuthors = _mapper.Map<List<BookAuthorResponseModel>>(book.BookAuthors);
+                    var bookAuthor = _mapper.Map<BookAuthorResponseModel>(book.BookAuthor);
                     var publisherResult = _mapper.Map<Publisher, PublisherResponseModel>(book.Publisher);
                     var bookResult = new BookResponseModel
                     {
@@ -86,7 +86,7 @@ namespace eBookStore.Service.Service.Implement
                         Title = book.Title,
                         Type = book.Type,
                         YTDSale = book.YTDSale,
-                        BookAuthors = bookAuthors
+                        BookAuthor = bookAuthor
                     };
                     result.Add(bookResult);
                 }
@@ -113,28 +113,24 @@ namespace eBookStore.Service.Service.Implement
                 }
 
                 #region BookAuthor
-                List<BookAuthor> bookAuthors = new List<BookAuthor>();
+                BookAuthor bookAuthor = new BookAuthor();
                 Author author = new Author();
-                
-                foreach (var bookAuthorRequest in bookRequest.BookAuthors)
-                {
-                    BookAuthor bookAuthor = new BookAuthor();
+
+
+                    var bookAuthorRequest = bookRequest.BookAuthor;
                     _mapper.Map<BookAuthorRequestModel, BookAuthor>(bookAuthorRequest, bookAuthor);
                     bookAuthor.BookId = book.BookId;
-                    bookAuthors.Add(bookAuthor);
                     author = AuthorRepository.Instance.GetAll().Where(x => x.AuthorId == bookAuthor.AuthorId)
                                                              .SingleOrDefault();
                     if (author == null)
                     {
                         throw new CrudException(HttpStatusCode.NotFound, $"Not found author with {bookAuthor.AuthorId}!!!", bookAuthor.AuthorId.ToString());
                     }
-                    author.BookAuthors = bookAuthors;
-                    book.BookAuthors = bookAuthors;
-                }
+                    author.BookAuthors.Add(bookAuthor);
                 #endregion
                  await BookRepository.Instance.InsertBook(book);
                 await AuthorRepository.Instance.UpdateAuthor(author);
-                var bookAuthorResult = _mapper.Map<List<BookAuthorResponseModel>>(book.BookAuthors);
+                var bookAuthorResult = _mapper.Map<BookAuthorResponseModel>(book.BookAuthor);
                 var bookResult = new BookResponseModel
                 {
                     BookId = book.BookId,
@@ -147,7 +143,7 @@ namespace eBookStore.Service.Service.Implement
                     PublishedDate = book.PublishedDate,
                     Royalty = book.Royalty,
                     YTDSale = book.YTDSale,
-                    BookAuthors = bookAuthorResult
+                    BookAuthor = bookAuthorResult
                 };
 
                 return bookResult;
